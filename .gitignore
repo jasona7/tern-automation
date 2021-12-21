@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project Specific
+_hb.json
+hb_test_dbg.log
+

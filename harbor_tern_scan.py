@@ -29,7 +29,6 @@ import time
 import pytz
 from datetime import datetime, date
 import random
-import dateutil.parser
 
 # Setup:
 LOG_FILE = 'hb_test_dbg.log'
@@ -177,8 +176,7 @@ def load_hb_projects():
                 for project in dct:
                     count += 1
                     object_count += 1
-                    #if verbose and datetime.strptime(project['update_time'], "%Y-%m-%dT%H:%M:%S:%SSZ") < datetime.now(pytz.utc):
-                    if verbose and dateutil.parser.isoparse(project['update_time']) < datetime.now(pytz.utc) - 5:
+                    if verbose and datetime.strptime(project['update_time'], "%Y-%m-%dT%H:%M:%S:%SSZ") > datetime.now(pytz.utc) - 10:
                         print("PROJECT:%s" % project['name'])
                         print("     ID:%s" % project['project_id'])
                         print("  REPOS:%s" % (project['repo_count'] if 'repo_count' in project else 'N/A'))
@@ -267,7 +265,7 @@ def load_hb_artifacts(project,repo):
     if verbose: print("Load Artifacts Count = %d" % count)
     return(object_list)
 
-def load_hb_vulnerabilities(repo_name,artifact_sha):
+""" def load_hb_vulnerabilities(repo_name,artifact_sha):
     page = 0
     loop = True
     count = 0
@@ -280,9 +278,9 @@ def load_hb_vulnerabilities(repo_name,artifact_sha):
 
     object_list = []
     while loop:
-        page += 1
+        page += 1 """
 
-####
+""" ####
 #        'https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/%s/repositories/%s/artifacts/%s/additions/vulnerabilities?page=%d&page_size=100' %
 #            (project_name,repo_url,hb_artifact[ORM.WR_STUDIO_HARBORARTIFACT_NAME],page),
 
@@ -323,7 +321,7 @@ def load_hb_vulnerabilities(repo_name,artifact_sha):
         loop = False
 
     print("Load Vulnerabilities Count = %d" % count)
-    return(object_list)
+    return(object_list) """
 
 #################################
 # Walk the Harbor tree
