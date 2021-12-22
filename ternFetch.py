@@ -2,8 +2,11 @@
 
 # Import the standard python library
 import argparse
-import subprocess
 import os
+import dateutil.parser
+from datetime import datetime,timedelta
+import json
+import arrow
 
 # Create the parser
 parser = argparse.ArgumentParser(
@@ -25,7 +28,7 @@ parser.add_argument(
     "--tag", "-t", dest="tag_name", required=True, help="Name of the tag"
 )
 parser.add_argument(
-    "--update-time", "-u", dest="update_time", help="Update time of the repo"
+    "--push-time", "-d", dest="push_time", help="Perform scan on artifacts pushed to Harbor in last __ days", type=int
 )
 parser.add_argument(
     "--output-dir", "-o", dest="output_dir", help="Output directory for the Tern file"
@@ -40,13 +43,21 @@ args = parser.parse_args()
 # Use args to define repo:tag then format output
 image_registry = "system.registry.aws-us-east-2.devstar.cloud/"
 image = image_registry + args.project_name + "/" + args.repo_name + ":" + args.tag_name
-print(image)
+#print(image)
 newformat = image.replace(":", "-").replace("/", "-")
-# subprocess.Popen(["sudo", "/mnt/c/projects/tern/docker_run.sh", "ternd", "report", "-i", $image, "-y", "1"])
+
 # print('Hello,', args)
-cmnd = (
-    'sudo /mnt/c/projects/tern/docker_run.sh ternd "report -i %s -y 1" > /tmp/%s.txt'
-    % (image, newformat)
-)
+#Check the push_time fo the artifact
+cmnd = 'curl -X GET https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/' + args.project_name + '/repositories/' + args.repo_name + '/artifacts?page=%d&page_size=40'
 print(cmnd)
 os.system(cmnd)
+
+if args.push_time is not None:
+    arw = arrow.utcnow()
+    print(args.push_time, "days ago the date was",  arw.shift(days=-10), "Checking for artifact push occuring since then.")
+    #print(push_time)
+
+""" cmnd = (
+    'sudo /mnt/c/projects/tern/docker_run.sh ternd "report -i %s -y 1" > /tmp/%s.txt'
+    % (image, newformat)
+) """
