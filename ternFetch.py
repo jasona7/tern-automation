@@ -9,6 +9,8 @@ import dateutil.parser
 from datetime import datetime,timedelta
 import json
 import arrow
+from builtins import str
+import re
 
 # Create the parser
 parser = argparse.ArgumentParser(
@@ -66,7 +68,24 @@ if args.push_time is not None:
     #harbor_push_time = stdout.encode()
     decoded_harbor_push_time = stdout.decode(encoding)
     print(decoded_harbor_push_time)
-    print(type(decoded_harbor_push_time))
+    
+    #print('**********data var below*****************')
+    #print(type(decoded_harbor_push_time))
+    
+    #get the repo level push_time value
+    parsed_push_time = decoded_harbor_push_time.split('\"push_time\"')
+    
+
+    print('******decoded to str below*****')
+    print(parsed_push_time)
+
+
+    print('***decoded harbor push count below******')
+    print(decoded_harbor_push_time.count('push_time'))
+
+    print('***values from push_count below******')
+    all_push_times = re.findall("push_time", decoded_harbor_push_time)
+    print(all_push_times)
 
 """ cmnd = (
     'sudo /mnt/c/projects/tern/docker_run.sh ternd "report -i %s -y 1" > /tmp/%s.txt'
