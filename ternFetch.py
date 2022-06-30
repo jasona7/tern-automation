@@ -51,8 +51,7 @@ image = image_registry + args.project_name + "/" + args.repo_name + ":" + args.t
 newformat = image.replace(":", "-").replace("/", "-")
 
 # print('Hello,', args)
-#Check the push_time fo the artifact
-#cmnd = 'curl -X GET https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/' + args.project_name + '/repositories/' + args.repo_name + '/artifacts?page=%d&page_size=40'
+#Check the push_time of the artifact
 #print(cmnd)
 #os.system(cmnd)
 
@@ -60,7 +59,7 @@ if args.push_time is not None:
     arw = arrow.utcnow()
     print(args.push_time, "days ago the date was",  arw.shift(days=-args.push_time), "Checking for pushes occuring since then.")
     #print(push_time)
-    cmnd = 'curl -X GET https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/' + args.project_name + '/repositories/' + args.repo_name + '/artifacts?page=%d&page_size=40'  
+    cmnd = 'curl -X GET https://$REGISTRY_URL/api/v2.0/projects/' + args.project_name + '/repositories/' + args.repo_name + '/artifacts?page=%d&page_size=40'  
     cmnd_response = subprocess.Popen(cmnd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True) # returns the exit code
     #cmnd_response = subprocess.Popen([cmnd], capture_output=True) # returns the exit code with no shell
     stdout, stderr = cmnd_response.communicate()
@@ -80,7 +79,7 @@ if args.push_time is not None:
     print(parsed_push_time)
 
 
-    print('***decoded harbor push count below******')
+    print('***decoded registry push count below******')
     print(decoded_harbor_push_time.count('push_time'))
 
     print('***values from push_count below******')
