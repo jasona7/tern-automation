@@ -230,7 +230,7 @@ def load_hb_artifacts(project,repo):
     while loop:
         page += 1
 
-        # curl -X GET "https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/wr-studio-product/repositories/wrlinux%2Frabbitmq/artifacts?page=1&page_size=10&with_tag=true&with_label=false&with_scan_overview=false&with_signature=false&with_immutable_status=false" -H  "accept: application/json"
+ 
 
         cmnd = ['curl','-X','GET','$REGISTRY_NAME/api/v2.0/projects/%s/repositories/%s/artifacts?page=%d&page_size=40' % (project,repo_url,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
         e_returncode,e_stdout,e_stderr,seconds = fetch_harbor(cmnd)
@@ -295,7 +295,7 @@ def main(argv):
     global verbose
     global disable_fix
 
-    parser = argparse.ArgumentParser(description='srtool_wr.py: Manage SRTool to Wind River')
+    parser = argparse.ArgumentParser(description='srtool_wr.py: Manage SRTool to WR')
     parser.add_argument('--count', '-n', dest='count', help='Number of test calls to Harbor')
     parser.add_argument('--verbose', '-v', action='store_true', dest='verbose', help='Verbose debugging')
     parser.add_argument('--disable-fix', '-f', action='store_true', dest='disable_fix', help='Disable the workaround fix')
