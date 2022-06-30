@@ -5,7 +5,7 @@
 #
 # Security Response Tool Commandline Tool
 #
-# Copyright (C) 2021       Wind River Systems
+# Copyright (C) 2021 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -84,13 +84,6 @@ def histogram_print():
     for seconds in histogram:
         _log("%3d] %d" % (seconds,histogram[seconds]),True)
 
-#################################
-# Safe Curl call to Harbor, with timeout protection
-#
-# cmnd = ['curl','-X','GET','https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects?page=1&page_size=40','-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
-# e_stderr="curl: (7) Failed to connect to system.registry.aws-us-east-2.devstar.cloud port 443: Connection timed out"
-#
-
 import signal
 from contextlib import contextmanager
 
@@ -159,7 +152,7 @@ def load_hb_projects():
     object_list = []
     while loop:
         page += 1
-        cmnd = ['curl','-X','GET','https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects?page=%d&page_size=40' % page,'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
+        cmnd = ['curl','-X','GET','$REGISTRY_NAME' % page,'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
         if verbose: print("Try:%s" % ' '.join(cmnd))
         e_returncode,e_stdout,e_stderr,seconds = fetch_harbor(cmnd)
         if e_returncode:
@@ -195,7 +188,7 @@ def load_hb_repos(project):
     object_list = []
     while loop:
         page += 1
-        cmnd = ['curl','-X','GET','https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/%s/repositories?page=%d&page_size=40' % (project,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
+        cmnd = ['curl','-X','GET','$REGISTRY_NAME/api/v2.0/projects/%s/repositories?page=%d&page_size=40' % (project,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
         e_returncode,e_stdout,e_stderr,seconds = fetch_harbor(cmnd)
         if e_returncode:
             print("ERROR:LOAD_PRODUCTS:%s,%s,%s" % (e_returncode,e_stdout,e_stderr))
@@ -239,7 +232,7 @@ def load_hb_artifacts(project,repo):
 
         # curl -X GET "https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/wr-studio-product/repositories/wrlinux%2Frabbitmq/artifacts?page=1&page_size=10&with_tag=true&with_label=false&with_scan_overview=false&with_signature=false&with_immutable_status=false" -H  "accept: application/json"
 
-        cmnd = ['curl','-X','GET','https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/%s/repositories/%s/artifacts?page=%d&page_size=40' % (project,repo_url,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
+        cmnd = ['curl','-X','GET','$REGISTRY_NAME/api/v2.0/projects/%s/repositories/%s/artifacts?page=%d&page_size=40' % (project,repo_url,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
         e_returncode,e_stdout,e_stderr,seconds = fetch_harbor(cmnd)
         if e_returncode:
             print("ERROR:LOAD_PRODUCTS:%s,%s,%s" % (e_returncode,e_stdout,e_stderr))
@@ -279,49 +272,6 @@ def load_hb_artifacts(project,repo):
     object_list = []
     while loop:
         page += 1 """
-
-""" ####
-#        'https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/%s/repositories/%s/artifacts/%s/additions/vulnerabilities?page=%d&page_size=100' %
-#            (project_name,repo_url,hb_artifact[ORM.WR_STUDIO_HARBORARTIFACT_NAME],page),
-
-
-        # curl -X GET "https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/wr-studio-product/repositories/wrlinux%2Frabbitmq/artifacts/sha256%3A3b944b1aed1abf1bcb685a84a590a8593d52c30f6fe37fd6bb2496becf384fd7/additions/vulnerabilities" -H  "accept: application/json" -H  "X-Request-Id: 1234"
-        cmnd = ['curl','-X','GET','https://system.registry.aws-us-east-2.devstar.cloud/api/v2.0/projects/%s/repositories/%s/artifacts/%s/additions/vulnerabilities?page=%d&page_size=100' % (project_name,repo_url,hb_artifact_name,page),'-H','accept: application/json','-H','X-Request-Id: 1234','-o',temp_file]
-        e_returncode,e_stdout,e_stderr,seconds = fetch_harbor(cmnd)
-        if e_returncode:
-            print("ERROR:LOAD_VULNERABILITY:%s,%s,%s" % (e_returncode,e_stdout,e_stderr))
-            return([])
-        print("    Page %2s: %s" % (page,seconds))
-
-        with open(temp_file) as json_data:
-            dct = json.load(json_data)
-            if not dct:
-                loop = False
-            else:
-                try:
-                    scan = dct["application/vnd.scanner.adapter.vuln.report.harbor+json; version=1.0"]
-                except Exception as e:
-                    # dct={'errors': [{'code': 'NOT_FOUND', 'message': 'report not found for prodrigu/hello-artifact@sha256:7a5a2a1eae5f1708f29b41de0ccbfd890642a3ee7f27dd7eff28ea96ec05beb3'}]}
-                    print("ERROR:scan:%s" % e)
-                    print("      dct=%s" % dct)
-                    exit(1)
-                for vulnerability in scan['vulnerabilities']:
-                    count += 1
-                    if verbose:
-                        print("[%3d] VUL:%s" % (count,vulnerability['id']))
-                        print("  PACKAGE:%s" % vulnerability['package'])
-                        print("       VER:%s" % vulnerability['version'])
-                        print("    FIXVER:%s" % vulnerability['fix_version'])
-                        print("       SEV:%s" % vulnerability['severity'])
-                        print("      DESC:%s" % vulnerability['description'][0:20])
-                    object_list.append(vulnerability['id'])
-
-        # WARNING: the API for vulnerabilities does not implement the page syntax
-        # so one pass is correct at this time
-        loop = False
-
-    print("Load Vulnerabilities Count = %d" % count)
-    return(object_list) """
 
 #################################
 # Walk the Harbor tree
